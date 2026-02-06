@@ -45,7 +45,7 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 开始按钮
-    const startButton = this.add.text(width / 2, height * 0.48, '🎮 选择关卡', {
+    const startButton = this.add.text(width / 2, height * 0.46, '🎮 选择关卡', {
       fontSize: '28px',
       fill: '#ffffff',
       backgroundColor: '#ff6348',
@@ -65,10 +65,31 @@ export default class MenuScene extends Phaser.Scene {
       this.scene.start('LevelSelectScene');
     });
 
+    // 联机按钮
+    const multiplayerButton = this.add.text(width / 2, height * 0.56, '🌐 多人联机', {
+      fontSize: '24px',
+      fill: '#ffffff',
+      backgroundColor: '#2e86de',
+      padding: { x: 26, y: 12 },
+      borderRadius: 10
+    }).setOrigin(0.5).setInteractive();
+
+    multiplayerButton.on('pointerover', () => {
+      multiplayerButton.setScale(1.08);
+    });
+
+    multiplayerButton.on('pointerout', () => {
+      multiplayerButton.setScale(1);
+    });
+
+    multiplayerButton.on('pointerdown', () => {
+      this.scene.start('MultiplayerLobbyScene');
+    });
+
     // 最高分显示（使用 ScoreManager 统一 key）
     const scoreManager = new ScoreManager();
     const highScore = scoreManager.getHighScore();
-    this.add.text(width / 2, height * 0.60, `🏆 最高分: ${highScore}`, {
+    this.add.text(width / 2, height * 0.66, `🏆 最高分: ${highScore}`, {
       fontSize: '18px',
       fill: '#ffd93d',
       stroke: '#000000',
@@ -76,14 +97,14 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 控制说明
-    this.add.text(width / 2, height * 0.68, '⬅️ ⬆️ 或左右滑动控制', {
+    this.add.text(width / 2, height * 0.72, '⬅️ ⬆️ 或左右滑动控制', {
       fontSize: '14px',
       fill: '#ffffff',
       alpha: 0.8
     }).setOrigin(0.5);
 
     // 操作提示
-    this.add.text(width / 2, height * 0.73, '躲避障碍物  ·  收集红包金币', {
+    this.add.text(width / 2, height * 0.77, '躲避障碍物  ·  收集红包金币', {
       fontSize: '13px',
       fill: '#ffffff',
       alpha: 0.6

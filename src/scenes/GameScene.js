@@ -12,6 +12,11 @@ export default class GameScene extends Phaser.Scene {
   }
 
   init(data) {
+    this.isMultiplayer = Boolean(data?.multiplayer);
+    this.playerId = data?.playerId || null;
+    this.playerName = data?.playerName || '玩家';
+    this.roomId = data?.roomId || null;
+
     // 关卡参数（默认无尽模式）
     const defaultConfig = {
       name: '无尽模式',
@@ -30,6 +35,7 @@ export default class GameScene extends Phaser.Scene {
       .filter(city => this.targetDistance === Infinity || city.distance <= this.targetDistance)
       .sort((a, b) => a.distance - b.distance);
     this.nextMilestoneIndex = 0;
+    this.currentCityName = '起点';
   }
 
   create() {
@@ -47,6 +53,7 @@ export default class GameScene extends Phaser.Scene {
     // 管理器
     this.audioManager = new AudioManager(this);
     this.scoreManager = new ScoreManager();
+    this.multiplayerManager = this.isMultiplayer ? this.registry.get('multiplayerManager') : null;
 
     // 创建背景
     this.createBackground();
@@ -63,6 +70,9 @@ export default class GameScene extends Phaser.Scene {
 
     // UI
     this.createUI();
+
+    // 联机事件
+    this.bindMultiplayerEvents();
 
     // 键盘控制
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -228,6 +238,10 @@ export default class GameScene extends Phaser.Scene {
       stroke: '#000000',
       strokeThickness: 3
     }).setOrigin(1, 0).setDepth(10);
+
+    if (this.isMultiplayer) {
+      this.createOpponentPanel();
+    }
   }
 
   spawnObjects() {
@@ -448,6 +462,7 @@ export default class GameScene extends Phaser.Scene {
     const lastCity = reached[reached.length - 1];
     const nextCity = this.cityMilestones[reached.length];
 
+    this.currentCityName = lastCity ? lastCity.name : '起点';
     const reachedLabel = lastCity ? `已达: ${lastCity.name}` : '已达: 起点';
     const nextLabel = nextCity ? `下一站: ${nextCity.name} ${nextCity.distance}m` : '所有城市已到达';
     this.cityText.setText(`${reachedLabel} · ${nextLabel}`);
@@ -458,6 +473,95 @@ export default class GameScene extends Phaser.Scene {
       this.showMilestoneBanner(milestone);
       this.nextMilestoneIndex++;
     }
+  }
+
+  createOpponentPanel() {
+    const width = this.cameras.main.width;
+    const panelWidth = 160;
+    const panelX = width - panelWidth - 12;
+    const panelY = 70;
+
+    this.opponentPanel = this.add.graphics().setDepth(9);
+    this.opponentPanel.fillStyle(0x000000, 0.45);
+    this.opponentPanel.fillRoundedRect(panelX, panelY, panelWidth, 120, 10);
+
+    this.opponentTitle = this.add.text(panelX + 10, panelY + 8, '对手', {
+      fontSize: '14px',
+      fill: '#ffffff',
+      fontStyle: 'bold'
+    }).setDepth(10);
+
+    this.opponentRows = [];
+    for (let i = 0; i < 3; i++) {
+      const row = this.add.text(panelX + 10, panelY + 30 + i * 28, '—', {
+        fontSize: '12px',
+        fill: '#f1f2f6'
+      }).setDepth(10);
+      this.opponentRows.push(row);
+    }
+  }
+
+  updateOpponentPanel(players) {
+    if (!this.opponentRows) return;
+    const opponents = players.filter((player) => player.id !== this.playerId);
+
+    for (let i = 0; i < this.opponentRows.length; i++) {
+      const row = this.opponentRows[i];
+      const player = opponents[i];
+      if (!player) {
+        row.setText('—');
+        continue;
+      }
+      const name = player.name?.slice(0, 4) || '玩家';
+      const dist = Math.floor(player.distance || 0);
+      const coin = player.coins || 0;
+      const boost = player.boostActive ? '⚡' : '';
+      row.setText(`🐴 ${name} ${boost}\n${dist}m 💰${coin}`);
+    }
+  }
+
+  bindMultiplayerEvents() {
+    if (!this.isMultiplayer || !this.multiplayerManager) return;
+
+    this.multiplayerManager.onPlayersState((payload) => {
+      this.updateOpponentPanel(payload.players || []);
+    });
+
+    this.multiplayerManager.onGameEnd((payload) => {
+      if (this.isGameOver) return;
+      this.isGameOver = true;
+      this.time.delayedCall(500, () => {
+        this.scene.start('GameOverScene', {
+          score: this.score,
+          coins: this.coins,
+          distance: Math.floor(this.distance)
+        });
+      });
+    });
+
+    this.stateTimer = this.time.addEvent({
+      delay: 200,
+      callback: () => this.sendStateUpdate(),
+      loop: true
+    });
+
+    this.events.once('shutdown', () => {
+      if (this.stateTimer) {
+        this.stateTimer.remove();
+      }
+      this.multiplayerManager.disconnect();
+      this.registry.remove('multiplayerManager');
+    });
+  }
+
+  sendStateUpdate() {
+    if (!this.multiplayerManager) return;
+    this.multiplayerManager.sendState({
+      distance: Math.floor(this.distance),
+      coins: this.coins,
+      speed: this.gameSpeed,
+      city: this.currentCityName
+    });
   }
 
   showMilestoneBanner(milestone) {
@@ -486,6 +590,10 @@ export default class GameScene extends Phaser.Scene {
     // 保存分数（通过 ScoreManager 统一管理）
     this.scoreManager.addScore(this.score);
 
+    if (this.isMultiplayer && this.multiplayerManager) {
+      this.multiplayerManager.sendFinished(Math.floor(this.distance));
+    }
+
     // 延迟跳转到游戏结束场景
     this.time.delayedCall(1000, () => {
       this.scene.start('GameOverScene', {
@@ -499,6 +607,10 @@ export default class GameScene extends Phaser.Scene {
   levelComplete() {
     this.isGameOver = true;
     this.scoreManager.addScore(this.score);
+
+    if (this.isMultiplayer && this.multiplayerManager) {
+      this.multiplayerManager.sendFinished(Math.floor(this.distance));
+    }
 
     // 解锁下一关（只针对有限距离关卡）
     if (this.levelData.index >= 0) {
