@@ -6,7 +6,8 @@ export default class Horse extends Phaser.GameObjects.Sprite {
     
     scene.add.existing(this);
     this.setOrigin(0.5);
-    this.setDisplaySize(64, 64);
+    // Increase player horse size for better visibility on mobile/vertical layout
+    this.setDisplaySize(160, 160);
     
     this.currentLane = 1; // 0:左, 1:中, 2:右
     this.invincible = false; // 无敌帧状态
@@ -50,7 +51,8 @@ export default class Horse extends Phaser.GameObjects.Sprite {
 
   getBounds() {
     // 缩小碰撞盒，给玩家一点容错空间
-    const s = this.displayWidth * 0.4;
+    // use a slightly smaller factor because the sprite is larger now
+    const s = this.displayWidth * 0.2;
     return new Phaser.Geom.Rectangle(
       this.x - s,
       this.y - s,
