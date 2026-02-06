@@ -1,0 +1,1 @@
+export default {\n  type: Phaser.AUTO,\n  width: 800,\n  height: 600,\n  parent: 'game-container',\n  backgroundColor: '#ff4757',\n  physics: {\n    default: 'arcade',\n    arcade: {\n      gravity: { y: 0 },\n      debug: false\n    }\n  },\n  scene: []  // 场景将在 main.js 中添加\n};
