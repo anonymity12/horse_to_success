@@ -10,6 +10,7 @@ export default class Horse extends Phaser.GameObjects.Text {
     this.setOrigin(0.5);
     
     this.currentLane = 1; // 0:左, 1:中, 2:右
+    this.invincible = false; // 无敌帧状态
     
     // 添加轻微的上下跳动动画
     scene.tweens.add({

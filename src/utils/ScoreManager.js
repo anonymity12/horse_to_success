@@ -1,3 +1,6 @@
+// 统一使用此 key 管理最高分
+const HIGH_SCORE_KEY = 'ma-dao-cheng-gong-highscore';
+
 export default class ScoreManager {
   constructor() {
     this.currentScore = 0;
@@ -17,11 +20,11 @@ export default class ScoreManager {
   }
 
   loadHighScore() {
-    return parseInt(localStorage.getItem('ma-dao-cheng-gong-highscore') || '0');
+    return parseInt(localStorage.getItem(HIGH_SCORE_KEY) || '0');
   }
 
   saveHighScore() {
-    localStorage.setItem('ma-dao-cheng-gong-highscore', this.highScore.toString());
+    localStorage.setItem(HIGH_SCORE_KEY, this.highScore.toString());
   }
 
   getCurrentScore() {
