@@ -1,5 +1,40 @@
 import Phaser from 'phaser';
 
-export default class Collectible extends Phaser.GameObjects.Text {\n  constructor(scene, x, y) {\n    const random = Math.random();\n    const emoji = random > 0.5 ? '🧧' : '🪙';\n    const type = random > 0.5 ? 'redpack' : 'coin';\n    \n    super(scene, x, y, emoji, {\n      fontSize: '40px'\n    });\n    \n    scene.add.existing(this);\n    this.setOrigin(0.5);\n    this.type = type;\n    \n    // 添加闪烁动画\n    scene.tweens.add({\n      targets: this,\n      scale: 1.2,\n      duration: 500,\n      yoyo: true,\n      repeat: -1,\n      ease: 'Sine.easeInOut'\n    });\n  }\n
-  update(speed, delta) {\n    this.y += speed * delta / 1000;\n  }\n
-  getBounds() {\n    return new Phaser.Geom.Rectangle(\n      this.x - 15,\n      this.y - 15,\n      30,\n      30\n    );\n  }\n}
+export default class Collectible extends Phaser.GameObjects.Text {
+  constructor(scene, x, y) {
+    const random = Math.random();
+    const emoji = random > 0.5 ? '🧧' : '🪙';
+    const type = random > 0.5 ? 'redpack' : 'coin';
+    
+    super(scene, x, y, emoji, {
+      fontSize: '40px'
+    });
+    
+    scene.add.existing(this);
+    this.setOrigin(0.5);
+    this.type = type;
+    
+    // 添加闪烁动画
+    scene.tweens.add({
+      targets: this,
+      scale: 1.2,
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  update(speed, delta) {
+    this.y += speed * delta / 1000;
+  }
+
+  getBounds() {
+    return new Phaser.Geom.Rectangle(
+      this.x - 15,
+      this.y - 15,
+      30,
+      30
+    );
+  }
+}

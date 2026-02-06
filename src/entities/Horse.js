@@ -1,7 +1,56 @@
 import Phaser from 'phaser';
 
-export default class Horse extends Phaser.GameObjects.Text {\n  constructor(scene, x, y) {\n    super(scene, x, y, '🐴', {\n      fontSize: '64px'\n    });\n    \n    scene.add.existing(this);\n    this.setOrigin(0.5);\n    \n    this.currentLane = 1; // 0:左, 1:中, 2:右\n    \n    // 添加轻微的上下跳动动画\n    scene.tweens.add({\n      targets: this,\n      y: y - 10,\n      duration: 300,\n      yoyo: true,\n      repeat: -1,\n      ease: 'Sine.easeInOut'\n    });\n  }\n
-  moveLeft(lanePositions) {\n    if (this.currentLane > 0) {\n      this.currentLane--;\n      this.moveTo(lanePositions[this.currentLane]);\n    }\n  }\n
-  moveRight(lanePositions) {\n    if (this.currentLane < lanePositions.length - 1) {\n      this.currentLane++;\n      this.moveTo(lanePositions[this.currentLane]);\n    }\n  }\n
-  moveTo(targetX) {\n    this.scene.tweens.add({\n      targets: this,\n      x: targetX,\n      duration: 150,\n      ease: 'Power2'\n    });\n  }\n
-  getBounds() {\n    return new Phaser.Geom.Rectangle(\n      this.x - 25,\n      this.y - 25,\n      50,\n      50\n    );\n  }\n}
+export default class Horse extends Phaser.GameObjects.Text {
+  constructor(scene, x, y) {
+    super(scene, x, y, '🐴', {
+      fontSize: '64px'
+    });
+    
+    scene.add.existing(this);
+    this.setOrigin(0.5);
+    
+    this.currentLane = 1; // 0:左, 1:中, 2:右
+    
+    // 添加轻微的上下跳动动画
+    scene.tweens.add({
+      targets: this,
+      y: y - 10,
+      duration: 300,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  moveLeft(lanePositions) {
+    if (this.currentLane > 0) {
+      this.currentLane--;
+      this.moveTo(lanePositions[this.currentLane]);
+    }
+  }
+
+  moveRight(lanePositions) {
+    if (this.currentLane < lanePositions.length - 1) {
+      this.currentLane++;
+      this.moveTo(lanePositions[this.currentLane]);
+    }
+  }
+
+  moveTo(targetX) {
+    this.scene.tweens.add({
+      targets: this,
+      x: targetX,
+      duration: 150,
+      ease: 'Power2'
+    });
+  }
+
+  getBounds() {
+    return new Phaser.Geom.Rectangle(
+      this.x - 25,
+      this.y - 25,
+      50,
+      50
+    );
+  }
+}
