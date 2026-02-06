@@ -7,37 +7,37 @@
     {
       "name": "run1",
       "index": 0,
-      "description": "galloping with front legs extended forward, mane flowing"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with front legs extended forward，back legs extended backward, mane flowing"
     },
     {
       "name": "run2",
       "index": 1,
-      "description": "galloping with all legs tucked under body mid-stride"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with all legs tucked back"
     },
     {
       "name": "run3",
       "index": 2,
-      "description": "galloping with back legs pushing off, dynamic pose"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with back legs pushing off"
     },
     {
       "name": "run4",
       "index": 3,
-      "description": "galloping with legs fully stretched out, peak stride"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with front legs stretched out"
     },
     {
       "name": "idle",
       "index": 4,
-      "description": "standing still in a relaxed pose, facing right"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, standing still，Top-down (bird's-eye) view"
     },
     {
       "name": "jump",
       "index": 5,
-      "description": "leaping upward with front legs raised high"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, leaping upward with front legs raised high,Top-down (bird's-eye) view"
     },
     {
       "name": "hit",
       "index": 6,
-      "description": "stumbling backward with a startled expression, off balance"
+      "description": "The horse's head is at the top of the picture, and its rump is at the bottom, stumbling backward, off balance,Top-down (bird's-eye) view"
     }
   ],
   "animations": {

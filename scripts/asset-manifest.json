@@ -8,15 +8,17 @@
   "objects": {
     "horse": {
       "frames": [
-        { "name": "run1", "desc": "galloping with front legs extended forward, mane flowing" },
-        { "name": "run2", "desc": "galloping with all legs tucked under body mid-stride" },
-        { "name": "run3", "desc": "galloping with back legs pushing off, dynamic pose" },
-        { "name": "run4", "desc": "galloping with legs fully stretched out, peak stride" },
-        { "name": "idle", "desc": "standing still in a relaxed pose, facing right" },
-        { "name": "jump", "desc": "leaping upward with front legs raised high" },
-        { "name": "hit", "desc": "stumbling backward with a startled expression, off balance" }
+        { "name": "run1", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with front legs extended forward，back legs extended backward, mane flowing" },
+        { "name": "run2", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with all legs tucked back" },
+        { "name": "run3", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with back legs pushing off" },
+        { "name": "run4", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, galloping with front legs stretched out" },
+        { "name": "idle", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, standing still，Top-down (bird's-eye) view" },
+        { "name": "jump", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, leaping upward with front legs raised high,Top-down (bird's-eye) view" },
+        { "name": "hit", "desc": "The horse's head is at the top of the picture, and its rump is at the bottom, stumbling backward, off balance,Top-down (bird's-eye) view" }
       ],
-      "prompt": "a cute cartoon horse character in Chinese New Year festive outfit with red and gold decorations, {frame_desc}, side view facing right, chibi style, bright vivid colors"
+      "//note": "horse frames should be generated as a chained sequence: each frame uses the previous frame as a visual reference so the motion is continuous",
+      "reference_chain": true,
+      "prompt": "Top-down (bird's-eye) view of a horse character, Red mythical beast style of The Classic of Mountains and Seas, centered and running forward away from the camera (toward the top of the frame). proportions identical across frames. {frame_desc}. Style: chibi / stylized, clean linework, bright vivid colors. IMPORTANT: For consistency, generate the first frame as the base image; for each subsequent frame, use the previous frame as the primary visual reference and produce only a small, plausible motion delta (adjust leg positions, mane/tail flow, subtle body tilt) — do NOT change background, viewpoint, costume, or overall anatomy."
     },
     "lion": {
       "frames": [
@@ -24,25 +26,25 @@
         { "name": "attack1", "desc": "lunging forward with mouth wide open, aggressive pose, facing left" },
         { "name": "attack2", "desc": "swiping with front paw, fierce expression, facing left" }
       ],
-      "prompt": "a Chinese guardian stone lion (shi shi), {frame_desc}, traditional ornate style with gold and red accents, game enemy character, chibi style"
+      "prompt": "Top-down (bird's-eye) view of a Chinese guardian stone lion (shi shi), {frame_desc}, traditional ornate style with gold and red accents, game enemy character, chibi style"
     },
     "vase": {
       "frames": [
         { "name": "idle", "desc": "an ornate Chinese porcelain vase with blue and white patterns, sitting upright" }
       ],
-      "prompt": "a beautiful Chinese blue and white porcelain vase (qinghua ci), {frame_desc}, traditional patterns, game obstacle item, clean design"
+      "prompt": "Top-down (bird's-eye) view of a beautiful Chinese blue and white porcelain vase (qinghua ci), {frame_desc}, traditional patterns, game obstacle item, clean design"
     },
     "stone": {
       "frames": [
         { "name": "idle", "desc": "a carved stone block with ancient Chinese patterns, slightly weathered" }
       ],
-      "prompt": "an ancient Chinese carved stone block with traditional cloud patterns, {frame_desc}, grey and brown tones with subtle gold inlay, game obstacle"
+      "prompt": "Top-down (bird's-eye) view of an ancient Chinese carved stone block with traditional cloud patterns, {frame_desc}, grey and brown tones with subtle gold inlay, game obstacle"
     },
     "brick": {
       "frames": [
         { "name": "idle", "desc": "a stack of traditional Chinese wall bricks with decorative carvings" }
       ],
-      "prompt": "traditional Chinese Great Wall style brick stack with decorative carvings, {frame_desc}, weathered stone texture, game obstacle"
+      "prompt": "Top-down (bird's-eye) view of a traditional Chinese Great Wall style brick stack with decorative carvings, {frame_desc}, weathered stone texture, game obstacle"
     },
     "redpack": {
       "frames": [
@@ -50,7 +52,7 @@
         { "name": "open1", "desc": "a red envelope slightly opening at the top, golden glow emerging" },
         { "name": "open2", "desc": "a red envelope fully opened with gold coins spilling out" }
       ],
-      "prompt": "a Chinese red envelope (hongbao) for New Year, {frame_desc}, glossy red paper with gold embossed decorations, festive style"
+      "prompt": "Top-down (bird's-eye) view of a Chinese red envelope (hongbao) for New Year, {frame_desc}, glossy red paper with gold embossed decorations, festive style"
     },
     "coin": {
       "frames": [
@@ -59,7 +61,7 @@
         { "name": "spin3", "desc": "a Chinese gold yuanbao ingot rotated to show the side edge" },
         { "name": "spin4", "desc": "a Chinese gold yuanbao ingot rotated 60 degrees showing back side" }
       ],
-      "prompt": "a shiny Chinese gold yuanbao ingot (gold sycee), {frame_desc}, gleaming metallic gold surface, treasure item, game collectible"
+      "prompt": "Top-down (bird's-eye) view of a shiny Chinese gold yuanbao ingot (gold sycee), {frame_desc}, gleaming metallic gold surface, treasure item, game collectible"
     }
   },
   "globalSuffix": "on a pure solid black background (#000000), absolutely no gradient, no shadow, no ground, no extra elements, centered in frame, clean sharp edges, digital art style, game asset sprite"

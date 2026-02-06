@@ -71,19 +71,31 @@ export default class GeminiClient {
   /**
    * 生成图片
    * @param {string} prompt - 图片生成提示词
+   * @param {Buffer|null} referenceBuffer - 可选：前一帧的图片 Buffer，用作视觉参考
    * @returns {Promise<Buffer>} PNG 图片 Buffer
    */
-  async generateImage(prompt) {
+  async generateImage(prompt, referenceBuffer = null) {
     await this.semaphore.acquire();
 
     try {
-      return await this._generateWithRetry(prompt);
+      try {
+        return await this._generateWithRetry(prompt, referenceBuffer);
+      } catch (err) {
+        // If the API rejects the image part structure (invalid argument),
+        // fall back to prompt-only generation to avoid blocking the pipeline.
+        const msg = String(err?.message || err);
+        if (msg.includes('required oneof field') || msg.includes('INVALID_ARGUMENT')) {
+          console.log('    ⚠️ 参考图未被接受，退回到无参考的文本生成');
+          return await this._generateWithRetry(prompt, null);
+        }
+        throw err;
+      }
     } finally {
       this.semaphore.release();
     }
   }
 
-  async _generateWithRetry(prompt) {
+  async _generateWithRetry(prompt, referenceBuffer = null) {
     let lastError;
 
     for (let attempt = 0; attempt < this.maxRetries; attempt++) {
@@ -94,11 +106,36 @@ export default class GeminiClient {
           await sleep(delay);
         }
 
+        // If a referenceBuffer is provided, attempt to include it in the request
+        // as an image part followed by the textual prompt. If the SDK rejects
+        // the composite contents shape, the catch block will handle fallback.
+        // Build contents following the SDK inlineData format:
+        // contents: [ { role: 'user', parts: [ { inlineData: { mimeType, data } }, { text: prompt } ] } ]
+        let contents;
+        if (referenceBuffer) {
+          try {
+            const b64 = referenceBuffer.toString('base64');
+            contents = [
+              {
+                role: 'user',
+                parts: [
+                  { inlineData: { mimeType: 'image/png', data: b64 } },
+                  { text: prompt }
+                ]
+              }
+            ];
+          } catch (err) {
+            contents = [ { role: 'user', parts: [ { text: prompt } ] } ];
+          }
+        } else {
+          contents = [ { role: 'user', parts: [ { text: prompt } ] } ];
+        }
+
         const response = await this.ai.models.generateContent({
           model: 'gemini-2.5-flash-image',
-          contents: prompt,
+          contents: contents,
           config: {
-            responseModalities: ['Text', 'Image'],
+            responseModalities: ['Image'],
           },
         });
 

@@ -18,6 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import GeminiClient from './lib/gemini-client.js';
 import { removeBlackBackground, trimAndResize } from './lib/image-processor.js';
+import sharp from 'sharp';
 import { buildSpritesheet, buildMetadata, saveSpritesheet } from './lib/spritesheet-builder.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +31,9 @@ function parseArgs() {
     only: null,       // 只生成指定对象 (逗号分隔)
     skipGenerate: false, // 跳过 AI 生成步骤
     dryRun: false,    // 只打印 prompt 不调用
+    seeds: {},        // map objectName -> seed image path (local)
+    clean: null,      // 清理指定对象资源（object or comma list or 'all'）
+    rawSize: null,    // optional: resize raw generated images to WxH (e.g. '512' or '512x512')
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -37,8 +41,23 @@ function parseArgs() {
       opts.only = args[++i].split(',').map(s => s.trim());
     } else if (args[i] === '--skip-generate') {
       opts.skipGenerate = true;
+    } else if (args[i] === '--seed' && args[i + 1]) {
+      // format: object=path  e.g. --seed horse=assets/ref/horse0.png
+      const pair = args[++i];
+      const idx = pair.indexOf('=');
+      if (idx > 0) {
+        const obj = pair.substring(0, idx).trim();
+        const p = pair.substring(idx + 1).trim();
+        if (obj && p) {
+          opts.seeds[obj] = p;
+        }
+      }
     } else if (args[i] === '--dry-run') {
       opts.dryRun = true;
+    } else if (args[i] === '--clean' && args[i + 1]) {
+      opts.clean = args[++i];
+    } else if (args[i] === '--raw-size' && args[i + 1]) {
+      opts.rawSize = args[++i];
     }
   }
   return opts;
@@ -72,6 +91,58 @@ async function main() {
   ensureDir(trimmedDir);
   ensureDir(absOutputDir);
 
+  // 如果传入 --clean，则只清理对应对象并退出
+  if (opts.clean) {
+    const toClean = opts.clean === 'all' ? Object.keys(objects) : opts.clean.split(',').map(s => s.trim()).filter(Boolean);
+    console.log('\n🧹 清理资源 - 对象: ' + toClean.join(', '));
+
+    for (const name of toClean) {
+      if (!objects[name]) {
+        console.log(`  ⚠️ 跳过未知对象: ${name}`);
+        continue;
+      }
+
+      // 删除原始、去背景、裁切临时文件
+      const patterns = [
+        path.join(rawDir, `${name}_*`),
+        path.join(nobgDir, `${name}_*`),
+        path.join(trimmedDir, `${name}_*`)
+      ];
+
+      for (const patternPath of patterns) {
+        const dir = path.dirname(patternPath);
+        const base = path.basename(patternPath).replace('*', '');
+        if (!fs.existsSync(dir)) continue;
+        const files = fs.readdirSync(dir).filter(f => f.startsWith(base));
+        for (const f of files) {
+          try {
+            fs.unlinkSync(path.join(dir, f));
+            console.log(`    ✅ 已删除: ${path.join(dir, f)}`);
+          } catch (err) {
+            console.log(`    ⚠️ 无法删除: ${path.join(dir, f)} (${err.message})`);
+          }
+        }
+      }
+
+      // 删除输出 spritesheet + json
+      const outPng = path.join(absOutputDir, `${name}.png`);
+      const outJson = path.join(absOutputDir, `${name}.json`);
+      for (const ofp of [outPng, outJson]) {
+        if (fs.existsSync(ofp)) {
+          try {
+            fs.unlinkSync(ofp);
+            console.log(`    ✅ 已删除输出: ${ofp}`);
+          } catch (err) {
+            console.log(`    ⚠️ 无法删除输出: ${ofp} (${err.message})`);
+          }
+        }
+      }
+    }
+
+    console.log('\n🧹 清理完成');
+    return;
+  }
+
   // 过滤要生成的对象
   let objectNames = Object.keys(objects);
   if (opts.only) {
@@ -94,31 +165,102 @@ async function main() {
     for (const objName of objectNames) {
       const obj = objects[objName];
       console.log(`\n📦 [${objName}] — ${obj.frames.length} 帧`);
-
-      for (const frame of obj.frames) {
-        const prompt = obj.prompt.replace('{frame_desc}', frame.desc) + ', ' + globalSuffix;
+      // For chained-reference generation, pass previous raw frame as visual reference
+      // and also append a short textual summary of the previous frame to the prompt
+      let previousRawPath = null;
+      let previousFrameDesc = null;
+      for (let fi = 0; fi < obj.frames.length; fi++) {
+        const frame = obj.frames[fi];
+        let prompt = obj.prompt.replace('{frame_desc}', frame.desc) + ', ' + globalSuffix;
+        // If manifest requests textual chaining and we have a previous frame description,
+        // append a compact summary to bias the generation toward continuity.
+        if (obj.reference_chain && previousFrameDesc) {
+          const summary = previousFrameDesc.replace(/\s+/g, ' ').trim();
+          prompt += ` Previous frame summary: "${summary}". Keep camera, palette, costume and proportions identical; only apply a minimal motion delta to limbs, mane and tail.`;
+        }
         const rawPath = path.join(rawDir, `${objName}_${frame.name}.png`);
 
         // 如果已存在则跳过
         if (fs.existsSync(rawPath)) {
           console.log(`  ✅ ${frame.name} — 已存在，跳过`);
+          // update previousRawPath to current so later frames can reference it
+          previousRawPath = rawPath;
           continue;
         }
 
         if (opts.dryRun) {
           console.log(`  🔤 ${frame.name} prompt:`);
-          console.log(`     ${prompt.substring(0, 120)}...`);
+          console.log(`     ${prompt.substring(0, 200)}...`);
+          // still set previousRawPath to null (no image created)
           continue;
         }
 
         console.log(`  🖼️  ${frame.name} — 生成中...`);
         try {
-          const buffer = await client.generateImage(prompt);
+          let refBuffer = null;
+          // Seed path (CLI) is used as the visual reference for the very first frame
+          // of an object when provided via --seed object=path or --seed all=path.
+          if (fi === 0) {
+            const seedPath = opts.seeds[objName] || opts.seeds.all;
+            if (seedPath) {
+              const resolved = path.resolve(ROOT, seedPath);
+              if (fs.existsSync(resolved)) {
+                try {
+                  refBuffer = fs.readFileSync(resolved);
+                  console.log(`    🔗 使用种子参考图: ${resolved}`);
+                } catch (err) {
+                  console.log(`    ⚠️ 无法读取种子图 ${resolved}, 将尝试使用前一帧或无参考`);
+                }
+              } else {
+                console.log(`    ⚠️ 种子图不存在: ${resolved}`);
+              }
+            }
+          }
+
+          // Only use previous frame as visual reference when manifest requests chaining
+          if (!refBuffer && obj.reference_chain && previousRawPath && fs.existsSync(previousRawPath)) {
+            try {
+              refBuffer = fs.readFileSync(previousRawPath);
+            } catch (err) {
+              refBuffer = null;
+            }
+          }
+
+          // Generate image (client will fallback to prompt-only if it can't accept the image part)
+          let buffer = await client.generateImage(prompt, refBuffer);
+
+          // If user requested raw resizing, resize the returned image to the specified size
+          if (opts.rawSize) {
+            try {
+              let w = null, h = null;
+              if (/^\d+x\d+$/i.test(opts.rawSize)) {
+                const parts = opts.rawSize.split('x').map(n => parseInt(n, 10));
+                w = parts[0]; h = parts[1];
+              } else if (/^\d+$/i.test(opts.rawSize)) {
+                w = h = parseInt(opts.rawSize, 10);
+              }
+
+              if (w && h) {
+                buffer = await sharp(buffer)
+                  .resize(w, h, { fit: 'contain', background: { r:0,g:0,b:0, alpha:0 } })
+                  .png()
+                  .toBuffer();
+                console.log(`    🔽 raw 已缩放至 ${w}x${h}`);
+              }
+            } catch (err) {
+              console.log(`    ⚠️ raw 缩放失败: ${err.message}`);
+            }
+          }
+
           fs.writeFileSync(rawPath, buffer);
           console.log(`  ✅ ${frame.name} — 已保存 (${(buffer.length / 1024).toFixed(1)} KB)`);
+          // set this frame as previous for next
+          previousRawPath = rawPath;
+          // save concise previous-frame description for textual chaining
+          previousFrameDesc = `${frame.name}: ${frame.desc}`;
         } catch (error) {
           console.error(`  ❌ ${frame.name} — 失败: ${error.message}`);
-          // 继续处理其他帧
+          // continue to next frame without updating previousRawPath
         }
       }
     }
