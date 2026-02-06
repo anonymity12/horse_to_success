@@ -203,7 +203,7 @@ export default class GameScene extends Phaser.Scene {
       this.obstacles.add(obstacle);
 
       // 如果是狮子，播放警告音效 + 显示警告标志
-      if (obstacle.text === '🦁') {
+      if (obstacle.obstacleType === 'lion') {
         this.audioManager.playWarningBeep();
         const warning = this.add.text(x, y + 40, '⚠️', {
           fontSize: '24px'
@@ -299,8 +299,9 @@ export default class GameScene extends Phaser.Scene {
     // 减速惩罚
     this.gameSpeed = Math.max(window.gameConfig.baseSpeed, this.gameSpeed - 50);
 
-    // 无敌帧 + 闪烁效果
+    // 无敌帧 + 闪烁效果 + 受击帧
     this.horse.invincible = true;
+    this.horse.playHit();
     this.tweens.add({
       targets: this.horse,
       alpha: 0.2,
@@ -310,6 +311,9 @@ export default class GameScene extends Phaser.Scene {
       onComplete: () => {
         this.horse.alpha = 1;
         this.horse.invincible = false;
+        if (!this.isGameOver) {
+          this.horse.playRun();
+        }
       }
     });
 
@@ -361,18 +365,19 @@ export default class GameScene extends Phaser.Scene {
     const particleCount = collectible.type === 'redpack' ? 6 : 3;
 
     for (let i = 0; i < particleCount; i++) {
-      const particle = this.add.text(
+      const particle = this.add.sprite(
         collectible.x + Phaser.Math.Between(-20, 20),
         collectible.y + Phaser.Math.Between(-20, 20),
-        '🪙',
-        { fontSize: '14px' }
-      ).setOrigin(0.5).setDepth(15);
+        'coin', 0
+      ).setOrigin(0.5).setDepth(15).setDisplaySize(18, 18);
 
+      const shrinkScale = particle.scaleX * 0.4;
       this.tweens.add({
         targets: particle,
         x: targetX,
         y: targetY,
-        scale: 0.5,
+        scaleX: shrinkScale,
+        scaleY: shrinkScale,
         duration: 400 + i * 60,
         ease: 'Power2.easeIn',
         onComplete: () => {

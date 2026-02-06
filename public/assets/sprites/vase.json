@@ -1,0 +1,22 @@
+{
+  "name": "vase",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 1,
+  "frames": [
+    {
+      "name": "idle",
+      "index": 0,
+      "description": "an ornate Chinese porcelain vase with blue and white patterns, sitting upright"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "frameRate": 1,
+      "repeat": -1,
+      "frames": [
+        0
+      ]
+    }
+  }
+}

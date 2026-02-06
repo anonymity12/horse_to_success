@@ -1,0 +1,40 @@
+{
+  "name": "lion",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 3,
+  "frames": [
+    {
+      "name": "idle",
+      "index": 0,
+      "description": "sitting in a menacing guard pose, facing left"
+    },
+    {
+      "name": "attack1",
+      "index": 1,
+      "description": "lunging forward with mouth wide open, aggressive pose, facing left"
+    },
+    {
+      "name": "attack2",
+      "index": 2,
+      "description": "swiping with front paw, fierce expression, facing left"
+    }
+  ],
+  "animations": {
+    "attack": {
+      "frameRate": 8,
+      "repeat": 0,
+      "frames": [
+        1,
+        2
+      ]
+    },
+    "idle": {
+      "frameRate": 1,
+      "repeat": -1,
+      "frames": [
+        0
+      ]
+    }
+  }
+}

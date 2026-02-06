@@ -1,26 +1,18 @@
 import Phaser from 'phaser';
 
-export default class Horse extends Phaser.GameObjects.Text {
+export default class Horse extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y) {
-    super(scene, x, y, '🐴', {
-      fontSize: '64px'
-    });
+    super(scene, x, y, 'horse', 0);
     
     scene.add.existing(this);
     this.setOrigin(0.5);
+    this.setDisplaySize(64, 64);
     
     this.currentLane = 1; // 0:左, 1:中, 2:右
     this.invincible = false; // 无敌帧状态
-    
-    // 添加轻微的上下跳动动画
-    scene.tweens.add({
-      targets: this,
-      y: y - 10,
-      duration: 300,
-      yoyo: true,
-      repeat: -1,
-      ease: 'Sine.easeInOut'
-    });
+
+    // 默认播放跑步动画
+    this.play('horse-run');
   }
 
   moveLeft(lanePositions) {
@@ -46,12 +38,24 @@ export default class Horse extends Phaser.GameObjects.Text {
     });
   }
 
+  /** 受击 — 切换到受击帧 */
+  playHit() {
+    this.setFrame(6);
+  }
+
+  /** 恢复跑步动画 */
+  playRun() {
+    this.play('horse-run');
+  }
+
   getBounds() {
+    // 缩小碰撞盒，给玩家一点容错空间
+    const s = this.displayWidth * 0.4;
     return new Phaser.Geom.Rectangle(
-      this.x - 25,
-      this.y - 25,
-      50,
-      50
+      this.x - s,
+      this.y - s,
+      s * 2,
+      s * 2
     );
   }
 }

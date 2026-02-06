@@ -1,0 +1,22 @@
+{
+  "name": "stone",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 1,
+  "frames": [
+    {
+      "name": "idle",
+      "index": 0,
+      "description": "a carved stone block with ancient Chinese patterns, slightly weathered"
+    }
+  ],
+  "animations": {
+    "idle": {
+      "frameRate": 1,
+      "repeat": -1,
+      "frames": [
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "outputDir": "public/assets/sprites",
+  "tmpDir": "scripts/.tmp",
+  "objects": {
+    "horse": {
+      "frames": [
+        { "name": "run1", "desc": "galloping with front legs extended forward, mane flowing" },
+        { "name": "run2", "desc": "galloping with all legs tucked under body mid-stride" },
+        { "name": "run3", "desc": "galloping with back legs pushing off, dynamic pose" },
+        { "name": "run4", "desc": "galloping with legs fully stretched out, peak stride" },
+        { "name": "idle", "desc": "standing still in a relaxed pose, facing right" },
+        { "name": "jump", "desc": "leaping upward with front legs raised high" },
+        { "name": "hit", "desc": "stumbling backward with a startled expression, off balance" }
+      ],
+      "prompt": "a cute cartoon horse character in Chinese New Year festive outfit with red and gold decorations, {frame_desc}, side view facing right, chibi style, bright vivid colors"
+    },
+    "lion": {
+      "frames": [
+        { "name": "idle", "desc": "sitting in a menacing guard pose, facing left" },
+        { "name": "attack1", "desc": "lunging forward with mouth wide open, aggressive pose, facing left" },
+        { "name": "attack2", "desc": "swiping with front paw, fierce expression, facing left" }
+      ],
+      "prompt": "a Chinese guardian stone lion (shi shi), {frame_desc}, traditional ornate style with gold and red accents, game enemy character, chibi style"
+    },
+    "vase": {
+      "frames": [
+        { "name": "idle", "desc": "an ornate Chinese porcelain vase with blue and white patterns, sitting upright" }
+      ],
+      "prompt": "a beautiful Chinese blue and white porcelain vase (qinghua ci), {frame_desc}, traditional patterns, game obstacle item, clean design"
+    },
+    "stone": {
+      "frames": [
+        { "name": "idle", "desc": "a carved stone block with ancient Chinese patterns, slightly weathered" }
+      ],
+      "prompt": "an ancient Chinese carved stone block with traditional cloud patterns, {frame_desc}, grey and brown tones with subtle gold inlay, game obstacle"
+    },
+    "brick": {
+      "frames": [
+        { "name": "idle", "desc": "a stack of traditional Chinese wall bricks with decorative carvings" }
+      ],
+      "prompt": "traditional Chinese Great Wall style brick stack with decorative carvings, {frame_desc}, weathered stone texture, game obstacle"
+    },
+    "redpack": {
+      "frames": [
+        { "name": "idle", "desc": "a closed red envelope with gold 福 character, slightly tilted" },
+        { "name": "open1", "desc": "a red envelope slightly opening at the top, golden glow emerging" },
+        { "name": "open2", "desc": "a red envelope fully opened with gold coins spilling out" }
+      ],
+      "prompt": "a Chinese red envelope (hongbao) for New Year, {frame_desc}, glossy red paper with gold embossed decorations, festive style"
+    },
+    "coin": {
+      "frames": [
+        { "name": "spin1", "desc": "a Chinese gold yuanbao ingot viewed from the front, full face" },
+        { "name": "spin2", "desc": "a Chinese gold yuanbao ingot slightly rotated 30 degrees" },
+        { "name": "spin3", "desc": "a Chinese gold yuanbao ingot rotated to show the side edge" },
+        { "name": "spin4", "desc": "a Chinese gold yuanbao ingot rotated 60 degrees showing back side" }
+      ],
+      "prompt": "a shiny Chinese gold yuanbao ingot (gold sycee), {frame_desc}, gleaming metallic gold surface, treasure item, game collectible"
+    }
+  },
+  "globalSuffix": "on a pure solid black background (#000000), absolutely no gradient, no shadow, no ground, no extra elements, centered in frame, clean sharp edges, digital art style, game asset sprite"
+}

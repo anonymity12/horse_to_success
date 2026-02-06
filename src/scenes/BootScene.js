@@ -32,11 +32,72 @@ export default class BootScene extends Phaser.Scene {
       loadingText.destroy();
     });
 
-    // 这里可以预加载资源，目前使用代码生成图形
+    // 加载 AI 生成的 spritesheet
+    const sprites = ['horse', 'lion', 'vase', 'stone', 'brick', 'coin', 'redpack'];
+    for (const name of sprites) {
+      this.load.spritesheet(name, `assets/sprites/${name}.png`, {
+        frameWidth: 128,
+        frameHeight: 128
+      });
+    }
   }
 
-
   create() {
+    // 创建动画
+    this.createAnimations();
     this.scene.start('MenuScene');
+  }
+
+  createAnimations() {
+    // 🐴 马的动画
+    this.anims.create({
+      key: 'horse-run',
+      frames: this.anims.generateFrameNumbers('horse', { frames: [0, 1, 2, 3] }),
+      frameRate: 10,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'horse-idle',
+      frames: this.anims.generateFrameNumbers('horse', { frames: [4] }),
+      frameRate: 1,
+      repeat: -1
+    });
+    // 跳跃 frame index 5, 受击 frame index 6 — 单帧，直接 setFrame 即可
+
+    // 🦁 狮子动画
+    this.anims.create({
+      key: 'lion-idle',
+      frames: this.anims.generateFrameNumbers('lion', { frames: [0] }),
+      frameRate: 1,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'lion-attack',
+      frames: this.anims.generateFrameNumbers('lion', { frames: [1, 2] }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    // 🪙 金币旋转
+    this.anims.create({
+      key: 'coin-spin',
+      frames: this.anims.generateFrameNumbers('coin', { frames: [0, 1, 2, 3] }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    // 🧧 红包
+    this.anims.create({
+      key: 'redpack-idle',
+      frames: this.anims.generateFrameNumbers('redpack', { frames: [0] }),
+      frameRate: 1,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'redpack-open',
+      frames: this.anims.generateFrameNumbers('redpack', { frames: [0, 1, 2] }),
+      frameRate: 6,
+      repeat: 0
+    });
   }
 }

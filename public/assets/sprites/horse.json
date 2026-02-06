@@ -1,0 +1,62 @@
+{
+  "name": "horse",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 7,
+  "frames": [
+    {
+      "name": "run1",
+      "index": 0,
+      "description": "galloping with front legs extended forward, mane flowing"
+    },
+    {
+      "name": "run2",
+      "index": 1,
+      "description": "galloping with all legs tucked under body mid-stride"
+    },
+    {
+      "name": "run3",
+      "index": 2,
+      "description": "galloping with back legs pushing off, dynamic pose"
+    },
+    {
+      "name": "run4",
+      "index": 3,
+      "description": "galloping with legs fully stretched out, peak stride"
+    },
+    {
+      "name": "idle",
+      "index": 4,
+      "description": "standing still in a relaxed pose, facing right"
+    },
+    {
+      "name": "jump",
+      "index": 5,
+      "description": "leaping upward with front legs raised high"
+    },
+    {
+      "name": "hit",
+      "index": 6,
+      "description": "stumbling backward with a startled expression, off balance"
+    }
+  ],
+  "animations": {
+    "run": {
+      "frameRate": 10,
+      "repeat": -1,
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "idle": {
+      "frameRate": 1,
+      "repeat": -1,
+      "frames": [
+        4
+      ]
+    }
+  }
+}

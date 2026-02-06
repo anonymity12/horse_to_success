@@ -1,0 +1,40 @@
+{
+  "name": "coin",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 4,
+  "frames": [
+    {
+      "name": "spin1",
+      "index": 0,
+      "description": "a Chinese gold yuanbao ingot viewed from the front, full face"
+    },
+    {
+      "name": "spin2",
+      "index": 1,
+      "description": "a Chinese gold yuanbao ingot slightly rotated 30 degrees"
+    },
+    {
+      "name": "spin3",
+      "index": 2,
+      "description": "a Chinese gold yuanbao ingot rotated to show the side edge"
+    },
+    {
+      "name": "spin4",
+      "index": 3,
+      "description": "a Chinese gold yuanbao ingot rotated 60 degrees showing back side"
+    }
+  ],
+  "animations": {
+    "spin": {
+      "frameRate": 8,
+      "repeat": -1,
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  }
+}

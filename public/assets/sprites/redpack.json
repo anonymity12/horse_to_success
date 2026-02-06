@@ -1,0 +1,41 @@
+{
+  "name": "redpack",
+  "frameWidth": 128,
+  "frameHeight": 128,
+  "frameCount": 3,
+  "frames": [
+    {
+      "name": "idle",
+      "index": 0,
+      "description": "a closed red envelope with gold 福 character, slightly tilted"
+    },
+    {
+      "name": "open1",
+      "index": 1,
+      "description": "a red envelope slightly opening at the top, golden glow emerging"
+    },
+    {
+      "name": "open2",
+      "index": 2,
+      "description": "a red envelope fully opened with gold coins spilling out"
+    }
+  ],
+  "animations": {
+    "open": {
+      "frameRate": 6,
+      "repeat": 0,
+      "frames": [
+        0,
+        1,
+        2
+      ]
+    },
+    "idle": {
+      "frameRate": 1,
+      "repeat": -1,
+      "frames": [
+        0
+      ]
+    }
+  }
+}
