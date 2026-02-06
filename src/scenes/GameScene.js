@@ -4,17 +4,40 @@ import Obstacle from '../entities/Obstacle.js';
 import Collectible from '../entities/Collectible.js';
 import AudioManager from '../utils/AudioManager.js';
 import ScoreManager from '../utils/ScoreManager.js';
+import cities from '../data/cities.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: 'GameScene' });
   }
 
+  init(data) {
+    // 关卡参数（默认无尽模式）
+    const defaultConfig = {
+      name: '无尽模式',
+      targetDistance: Infinity,
+      baseSpeed: window.gameConfig.baseSpeed,
+      speedIncrease: window.gameConfig.speedIncrease,
+      spawnInterval: window.gameConfig.spawnInterval,
+      index: -1
+    };
+
+    this.levelData = data?.level ? { ...defaultConfig, ...data.level } : defaultConfig;
+    this.targetDistance = this.levelData.targetDistance ?? Infinity;
+
+    // 城市里程碑（按距离排序）
+    this.cityMilestones = [...cities]
+      .filter(city => this.targetDistance === Infinity || city.distance <= this.targetDistance)
+      .sort((a, b) => a.distance - b.distance);
+    this.nextMilestoneIndex = 0;
+  }
+
   create() {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    this.gameSpeed = window.gameConfig.baseSpeed;
+    this.gameSpeed = this.levelData.baseSpeed;
+    this.speedIncrease = this.levelData.speedIncrease;
     this.score = 0;
     this.coins = 0;
     this.distance = 0;
@@ -51,7 +74,7 @@ export default class GameScene extends Phaser.Scene {
 
     // 生成定时器
     this.spawnTimer = this.time.addEvent({
-      delay: window.gameConfig.spawnInterval,
+      delay: this.levelData.spawnInterval,
       callback: this.spawnObjects,
       callbackScope: this,
       loop: true
@@ -62,7 +85,7 @@ export default class GameScene extends Phaser.Scene {
       delay: 5000,
       callback: () => {
         if (!this.isGameOver) {
-          this.gameSpeed += window.gameConfig.speedIncrease;
+          this.gameSpeed += this.speedIncrease;
         }
       },
       loop: true
@@ -150,6 +173,15 @@ export default class GameScene extends Phaser.Scene {
   createUI() {
     const width = this.cameras.main.width;
 
+    // 关卡显示
+    this.levelText = this.add.text(width / 2, 12, `🎯 ${this.levelData.name}`, {
+      fontSize: '20px',
+      fill: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 4
+    }).setOrigin(0.5, 0).setDepth(10);
+
     // 生命值显示
     this.healthText = this.add.text(20, 16, '❤️❤️❤️', {
       fontSize: '20px'
@@ -185,6 +217,14 @@ export default class GameScene extends Phaser.Scene {
     this.speedText = this.add.text(width - 20, 16, '速度: 1x', {
       fontSize: '16px',
       fill: '#ffd93d',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(1, 0).setDepth(10);
+
+    // 城市进度显示
+    this.cityText = this.add.text(width - 20, 42, '下一站: --', {
+      fontSize: '14px',
+      fill: '#ffffff',
       stroke: '#000000',
       strokeThickness: 3
     }).setOrigin(1, 0).setDepth(10);
@@ -233,7 +273,14 @@ export default class GameScene extends Phaser.Scene {
     this.scoreText.setText(`分数: ${this.score}`);
     this.coinsText.setText(`🪙 ${this.coins}`);
     this.distanceText.setText(`距离: ${Math.floor(this.distance)}m`);
-    this.speedText.setText(`速度: ${(this.gameSpeed / window.gameConfig.baseSpeed).toFixed(1)}x`);
+    this.speedText.setText(`速度: ${(this.gameSpeed / this.levelData.baseSpeed).toFixed(1)}x`);
+    this.updateCityProgress();
+
+    // 关卡目标达成
+    if (this.targetDistance !== Infinity && this.distance >= this.targetDistance) {
+      this.levelComplete();
+      return;
+    }
 
     // 马的控制
     if (Phaser.Input.Keyboard.JustDown(this.cursors.left) ||  
@@ -396,6 +443,43 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
+  updateCityProgress() {
+    const reached = this.cityMilestones.filter(city => this.distance >= city.distance);
+    const lastCity = reached[reached.length - 1];
+    const nextCity = this.cityMilestones[reached.length];
+
+    const reachedLabel = lastCity ? `已达: ${lastCity.name}` : '已达: 起点';
+    const nextLabel = nextCity ? `下一站: ${nextCity.name} ${nextCity.distance}m` : '所有城市已到达';
+    this.cityText.setText(`${reachedLabel} · ${nextLabel}`);
+
+    // 逐个触发里程碑弹窗
+    const milestone = this.cityMilestones[this.nextMilestoneIndex];
+    if (milestone && this.distance >= milestone.distance) {
+      this.showMilestoneBanner(milestone);
+      this.nextMilestoneIndex++;
+    }
+  }
+
+  showMilestoneBanner(milestone) {
+    const width = this.cameras.main.width;
+    const banner = this.add.text(width / 2, 140, `🏙️ 抵达 ${milestone.name}!`, {
+      fontSize: '22px',
+      fill: '#ffffff',
+      fontStyle: 'bold',
+      backgroundColor: '#ff6348',
+      padding: { x: 18, y: 10 }
+    }).setOrigin(0.5).setDepth(20).setAlpha(0);
+
+    this.tweens.add({
+      targets: banner,
+      alpha: 1,
+      duration: 200,
+      yoyo: true,
+      hold: 900,
+      onComplete: () => banner.destroy()
+    });
+  }
+
   gameOver() {
     this.isGameOver = true;
     
@@ -404,6 +488,28 @@ export default class GameScene extends Phaser.Scene {
 
     // 延迟跳转到游戏结束场景
     this.time.delayedCall(1000, () => {
+      this.scene.start('GameOverScene', {
+        score: this.score,
+        coins: this.coins,
+        distance: Math.floor(this.distance)
+      });
+    });
+  }
+
+  levelComplete() {
+    this.isGameOver = true;
+    this.scoreManager.addScore(this.score);
+
+    // 解锁下一关（只针对有限距离关卡）
+    if (this.levelData.index >= 0) {
+      const savedUnlock = window.localStorage.getItem('horse_level_unlocked');
+      const parsed = Number.parseInt(savedUnlock, 10);
+      const currentUnlocked = Number.isFinite(parsed) ? parsed : 0;
+      const newUnlocked = Math.max(currentUnlocked, this.levelData.index + 1);
+      window.localStorage.setItem('horse_level_unlocked', `${newUnlocked}`);
+    }
+
+    this.time.delayedCall(600, () => {
       this.scene.start('GameOverScene', {
         score: this.score,
         coins: this.coins,

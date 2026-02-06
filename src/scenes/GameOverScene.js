@@ -91,7 +91,7 @@ export default class GameOverScene extends Phaser.Scene {
     restartButton.on('pointerover', () => restartButton.setScale(1.1));
     restartButton.on('pointerout', () => restartButton.setScale(1));
     restartButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
+      this.scene.start('LevelSelectScene');
     });
 
     // \u8fd4\u56de\u83dc\u5355\u6309\u94ae

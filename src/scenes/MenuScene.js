@@ -45,7 +45,7 @@ export default class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // 开始按钮
-    const startButton = this.add.text(width / 2, height * 0.48, '🎮 开始游戏', {
+    const startButton = this.add.text(width / 2, height * 0.48, '🎮 选择关卡', {
       fontSize: '28px',
       fill: '#ffffff',
       backgroundColor: '#ff6348',
@@ -62,7 +62,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     startButton.on('pointerdown', () => {
-      this.scene.start('GameScene');
+      this.scene.start('LevelSelectScene');
     });
 
     // 最高分显示（使用 ScoreManager 统一 key）
